@@ -1,0 +1,22 @@
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.vs/
+*.vscode/
+*.Up2Date
+*.AssemblyAttributes.cs
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Docker (opsiyonel)
+docker-compose.override.yaml
