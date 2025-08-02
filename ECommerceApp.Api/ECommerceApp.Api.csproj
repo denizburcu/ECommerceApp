@@ -23,4 +23,9 @@
       <ProjectReference Include="..\ECommerceApp.Application\ECommerceApp.Application.csproj" />
     </ItemGroup>
 
+  <ItemGroup>
+      <None Update="appsettings.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+   </ItemGroup>
 </Project>
