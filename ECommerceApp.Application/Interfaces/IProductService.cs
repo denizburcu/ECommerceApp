@@ -16,7 +16,7 @@ public interface IProductService
     /// <summary>
     /// Retrieves a product by its unique identifier.
     /// </summary>
-    Task<ProductDto> GetByIdAsync(string id);
+    Task<ProductDto> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Creates a new product.
@@ -26,10 +26,10 @@ public interface IProductService
     /// <summary>
     /// Updates an existing product by ID.
     /// </summary>
-    Task<bool> UpdateAsync(string id, UpdateProductRequest dto);
+    Task<bool> UpdateAsync(Guid id, UpdateProductRequest dto);
 
     /// <summary>
     /// Deletes a product by its ID.
     /// </summary>
-    Task<bool> DeleteAsync(string id);
+    Task<bool> DeleteAsync(Guid id);
 }

@@ -11,6 +11,11 @@ public class ProductEntity
     public Guid Id { get; set; }
 
     /// <summary>
+    /// External Id
+    /// </summary>
+    public string ExternalProductId { get; set; }
+    
+    /// <summary>
     /// Name of the product.
     /// </summary>
     public string Name { get; set; }
