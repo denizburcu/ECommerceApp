@@ -16,5 +16,9 @@
       <PackageReference Include="Newtonsoft.json" Version="13.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ECommerceApp.Domain\ECommerceApp.Domain.csproj" />
+    </ItemGroup>
+
 
 </Project>

@@ -12,4 +12,8 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.18" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ECommerceApp.Domain\ECommerceApp.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
