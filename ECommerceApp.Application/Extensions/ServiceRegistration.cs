@@ -1,14 +1,19 @@
 using ECommerceApp.Application.Interfaces;
 using ECommerceApp.Application.Services;
+using System.Net.Http;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ECommerceApp.Persistence.Contexts;
 using ECommerceApp.Application.Configurations;
+using ECommerceApp.Domain.Repositories;
 using ECommerceApp.Infrastructure.Configurations;
 using Microsoft.Extensions.Options; 
 using ECommerceApp.Infrastructure.Services;
 using ECommerceApp.Infrastructure.Interfaces;
+using ECommerceApp.Persistence;
+using ECommerceApp.Persistence.Repositories;
 
 namespace ECommerceApp.Application.Extensions
 {
@@ -20,8 +25,6 @@ namespace ECommerceApp.Application.Extensions
         /// <summary>
         /// Registers application services in the dependency injection container.
         /// </summary>
-        /// <param name="services">The service collection to add services to.</param>
-        /// <returns>The updated service collection.</returns>
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<IDataContext, PostgreDataContext>((sp, options) =>
@@ -29,6 +32,12 @@ namespace ECommerceApp.Application.Extensions
                 var config = sp.GetRequiredService<IOptions<AppSettings>>().Value;
                 options.UseNpgsql(config.ConnectionStrings.Postgres);
             });
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IProductService, ProductService>();
+            
+            services.AddScoped<IProductRepository, ProductRepository>();
+
 
             return services;
         }
@@ -43,6 +52,13 @@ namespace ECommerceApp.Application.Extensions
 
             // Log
             services.AddSingleton<ILogService, LogstashService>();
+            
+            // Clients
+            services.AddHttpClient<IBalanceApiClient, BalanceApiClient>((serviceProvider, client) =>
+            {
+                var options = serviceProvider.GetRequiredService<IOptions<BalanceApiSettings>>();
+                client.BaseAddress = new Uri(options.Value.BalanceApiBaseUrl);
+            });
             
             return services;
         }
