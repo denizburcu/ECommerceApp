@@ -1,19 +1,19 @@
-using ECommerceApp.Application.Interfaces;
-using ECommerceApp.Application.Services;
 using System.Net.Http;
 using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using ECommerceApp.Persistence.Contexts;
+using ECommerceApp.Application.Services;
+using ECommerceApp.Application.Interfaces;
 using ECommerceApp.Application.Configurations;
 using ECommerceApp.Domain.Repositories;
-using ECommerceApp.Infrastructure.Configurations;
-using Microsoft.Extensions.Options; 
+using ECommerceApp.Persistence;
+using ECommerceApp.Persistence.Contexts;
+using ECommerceApp.Persistence.Repositories;
 using ECommerceApp.Infrastructure.Services;
 using ECommerceApp.Infrastructure.Interfaces;
-using ECommerceApp.Persistence;
-using ECommerceApp.Persistence.Repositories;
+using ECommerceApp.Infrastructure.Configurations;
 
 namespace ECommerceApp.Application.Extensions
 {
@@ -25,7 +25,8 @@ namespace ECommerceApp.Application.Extensions
         /// <summary>
         /// Registers application services in the dependency injection container.
         /// </summary>
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services,
+            IConfiguration configuration)
         {
             services.AddDbContext<IDataContext, PostgreDataContext>((sp, options) =>
             {
@@ -35,14 +36,18 @@ namespace ECommerceApp.Application.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IProductService, ProductService>();
-            
+
             services.AddScoped<IProductRepository, ProductRepository>();
 
 
             return services;
         }
-        
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+
+        /// <summary>
+        /// Registers infrastructure services in the dependency injection container.
+        /// </summary>
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
+            IConfiguration configuration)
         {
             // Redis
             var redisSettings = new RedisSettings();
@@ -52,14 +57,14 @@ namespace ECommerceApp.Application.Extensions
 
             // Log
             services.AddSingleton<ILogService, LogstashService>();
-            
+
             // Clients
             services.AddHttpClient<IBalanceApiClient, BalanceApiClient>((serviceProvider, client) =>
             {
                 var options = serviceProvider.GetRequiredService<IOptions<BalanceApiSettings>>();
                 client.BaseAddress = new Uri(options.Value.BalanceApiBaseUrl);
             });
-            
+
             return services;
         }
     }
