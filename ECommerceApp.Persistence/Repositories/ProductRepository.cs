@@ -33,9 +33,17 @@ public class ProductRepository : IProductRepository
     /// <summary>
     /// Retrieves a product by its unique identifier.
     /// </summary>
-    public async Task<ProductEntity?> GetByIdAsync(string id)
+    public async Task<ProductEntity?> GetByIdAsync(Guid id)
     {
-        return await _context.Products.FindAsync(id);
+        return await _context.Products.Where(x=>x.Id == id).FirstOrDefaultAsync();
+    }
+    
+    /// <summary>
+    /// Retrieves a product by its external identifier.
+    /// </summary>
+    public async Task<ProductEntity?> GetByExternalIdAsync(string externalId)
+    {
+        return await _context.Products.Where(x=>x.ExternalProductId == externalId).FirstOrDefaultAsync();
     }
 
     /// <summary>

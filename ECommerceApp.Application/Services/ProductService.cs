@@ -35,7 +35,7 @@ public class ProductService : IProductService
     /// <summary>
     /// Retrieves a product by its unique identifier.
     /// </summary>
-    public async Task<ProductDto> GetByIdAsync(string id)
+    public async Task<ProductDto> GetByIdAsync(Guid id)
     {
         var product = await _productRepository.GetByIdAsync(id);
         return product.Adapt<ProductDto>();
@@ -55,7 +55,7 @@ public class ProductService : IProductService
     /// <summary>
     /// Updates an existing product.
     /// </summary>
-    public async Task<bool> UpdateAsync(string id, UpdateProductRequest dto)
+    public async Task<bool> UpdateAsync(Guid id, UpdateProductRequest dto)
     {
         var existing = await _productRepository.GetByIdAsync(id);
         if (existing is null) return false;
@@ -70,7 +70,7 @@ public class ProductService : IProductService
     /// <summary>
     /// Deletes a product by its ID.
     /// </summary>
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         var existing = await _productRepository.GetByIdAsync(id);
         if (existing is null) return false;

@@ -13,9 +13,14 @@ public interface IProductRepository
     Task<IEnumerable<ProductEntity>> GetAllAsync();
 
     /// <summary>
+    /// Retrieves a product by its external identifier.
+    /// </summary>
+    Task<ProductEntity?> GetByExternalIdAsync(string externalId);
+
+    /// <summary>
     /// Retrieves a single product by its unique identifier.
     /// </summary>
-    Task<ProductEntity?> GetByIdAsync(string id);
+    Task<ProductEntity?> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Adds a new product to the data source.

@@ -59,10 +59,15 @@ namespace ECommerceApp.Application.Extensions
             services.AddSingleton<ILogService, LogstashService>();
 
             // Clients
-            services.AddHttpClient<IBalanceApiClient, BalanceApiClient>((serviceProvider, client) =>
+            services.Configure<BalanceApiSettings>(configuration.GetSection("ExternalServices"));
+            services.AddHttpClient<IBalanceApiClient, BalanceApiClient>((sp, client) =>
             {
-                var options = serviceProvider.GetRequiredService<IOptions<BalanceApiSettings>>();
-                client.BaseAddress = new Uri(options.Value.BalanceApiBaseUrl);
+                var config = sp.GetRequiredService<IOptions<BalanceApiSettings>>().Value;
+
+                if (string.IsNullOrWhiteSpace(config.BalanceApiBaseUrl))
+                    throw new InvalidOperationException("BalanceApiBaseUrl is not configured properly.");
+
+                client.BaseAddress = new Uri(config.BalanceApiBaseUrl);
             });
 
             return services;
