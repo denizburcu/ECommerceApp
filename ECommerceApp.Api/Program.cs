@@ -1,12 +1,10 @@
 ﻿using ECommerceApp.Api.Middlewares;
 using ECommerceApp.Application.BackgroundServices;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using ECommerceApp.Persistence.Contexts;
 using ECommerceApp.Application.Extensions;
 using ECommerceApp.Application.Configurations;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppSettings>(builder.Configuration);
@@ -20,9 +18,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHttpClient();
+
+builder.Services.AddApiMessaging(builder.Configuration);
+
+
 builder.Services.AddHostedService<ProductSyncBackgroundService>();
 
+
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 // Apply pending migrations at startup
 using (var scope = app.Services.CreateScope())
@@ -38,9 +44,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.UseAuthorization();
 app.MapControllers();

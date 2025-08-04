@@ -13,11 +13,15 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+      <PackageReference Include="MassTransit" Version="8.5.1" />
+      <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
+      <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\ECommerceApp.Infrastructure\ECommerceApp.Infrastructure.csproj" />
       <ProjectReference Include="..\ECommerceApp.Persistence\ECommerceApp.Persistence.csproj" />
+      <ProjectReference Include="..\ECommerceApp.Shared\ECommerceApp.Shared.csproj" />
     </ItemGroup>
 
 </Project>

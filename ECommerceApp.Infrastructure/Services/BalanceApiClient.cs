@@ -20,14 +20,6 @@ public class BalanceApiClient : IBalanceApiClient
     }
     
     /// <summary>
-    /// Initializes a new instance of the <see cref="BalanceApiClient"/> class.
-    /// </summary>
-    public BalanceApiClient(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-    
-    /// <summary>
     /// Get Product Async
     /// </summary>
     public async Task<List<ProductResponseDto>> GetProductsAsync()
