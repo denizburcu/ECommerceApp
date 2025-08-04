@@ -1,3 +1,5 @@
+namespace ECommerceApp.Tests.IntegrationTests.Infrastructure;
+
 using System.Text.Json;
 using ECommerceApp.Domain.DTOs.External;
 using ECommerceApp.Infrastructure.Configurations;
@@ -5,18 +7,20 @@ using ECommerceApp.Infrastructure.Interfaces;
 using ECommerceApp.Infrastructure.Services;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Moq;
 using NUnit.Framework;
-
-namespace ECommerceApp.Tests.IntegrationTests.Infrastructure;
 
 [TestFixture]
 public class BalanceApiClientTests
 {
     private IBalanceApiClient _balanceApiClient = null!;
+    private Mock<ILogService> _mockLogService = null!;
 
     [SetUp]
     public void SetUp()
     {
+        _mockLogService = new Mock<ILogService>();
+        
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
@@ -29,7 +33,7 @@ public class BalanceApiClientTests
             BaseAddress = new Uri(balanceApiSettings.BalanceApiBaseUrl)
         };
 
-        _balanceApiClient = new BalanceApiClient(httpClient);
+        _balanceApiClient = new BalanceApiClient(httpClient, _mockLogService.Object);
     }
 
     [Test]

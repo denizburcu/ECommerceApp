@@ -1,6 +1,8 @@
 using ECommerceApp.Application.DTOs.Product;
 using ECommerceApp.Application.Interfaces;
 using ECommerceApp.Domain.Entities;
+using ECommerceApp.Infrastructure.Interfaces;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceApp.Api.Controllers;
@@ -19,6 +21,7 @@ public class ProductsController : ControllerBase
         _productService = productService;
     }
 
+    
     /// <summary>
     /// Returns all products.
     /// </summary>
