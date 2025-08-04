@@ -1,3 +1,4 @@
+using ECommerceApp.Application.Common;
 using ECommerceApp.Application.DTOs.Product;
 using ECommerceApp.Domain.Entities;
 
@@ -11,7 +12,7 @@ public interface IProductService
     /// <summary>
     /// Retrieves all products.
     /// </summary>
-    Task<IEnumerable<ProductDto>> GetAllAsync();
+    Task<ServiceResult<IEnumerable<ProductDto>>> GetAllAsync();
 
     /// <summary>
     /// Retrieves a product by its unique identifier.
