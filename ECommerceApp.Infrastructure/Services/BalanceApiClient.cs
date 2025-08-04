@@ -18,7 +18,18 @@ public class BalanceApiClient : IBalanceApiClient
         _httpClient = httpClient;
         _logService = logService;
     }
-
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BalanceApiClient"/> class.
+    /// </summary>
+    public BalanceApiClient(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
+    
+    /// <summary>
+    /// Get Product Async
+    /// </summary>
     public async Task<List<ProductResponseDto>> GetProductsAsync()
     {
         try
@@ -37,18 +48,25 @@ public class BalanceApiClient : IBalanceApiClient
         }
     }
 
+    /// <summary>
+    /// Pre Order Async
+    /// </summary>
     public async Task<PreOrderResponseDto> PreOrderAsync(PreOrderRequestDto request)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/preorder", request);
+        var response = await _httpClient.PostAsJsonAsync("api/balance/preorder", request);
+
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<PreOrderResponseDto>();
         return result!;
     }
-
+    
+    // <summary>
+    /// Sends a request to complete a pre-order.
+    /// </summary>
     public async Task<CompleteOrderResponseDto> CompleteOrderAsync(CompleteOrderRequestDto request)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/complete", request);
+        var response = await _httpClient.PostAsJsonAsync("api/balance/complete", request);
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<CompleteOrderResponseDto>();
