@@ -1,7 +1,7 @@
+namespace ECommerceApp.Application.Services;
 using ECommerceApp.Application.DTOs.Product;
 using ECommerceApp.Application.Interfaces;
-
-namespace ECommerceApp.Application.Services;
+using ECommerceApp.Infrastructure.Interfaces;
 using ECommerceApp.Application.DTOs;
 using ECommerceApp.Application.Services;
 using ECommerceApp.Domain.Entities;
@@ -14,13 +14,17 @@ using Mapster;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private readonly ICacheService _cacheService;
+    private readonly ILogService _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductService"/> class.
     /// </summary>
-    public ProductService(IProductRepository productRepository)
+    public ProductService(IProductRepository productRepository, ICacheService cacheService, ILogService logger)
     {
         _productRepository = productRepository;
+        _cacheService = cacheService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -28,8 +32,37 @@ public class ProductService : IProductService
     /// </summary>
     public async Task<IEnumerable<ProductDto>> GetAllAsync()
     {
-        var products = await _productRepository.GetAllAsync();
-        return products.Adapt<IEnumerable<ProductDto>>();
+        const string cacheKey = "products:all";
+
+        try
+        {
+            var cached = await _cacheService.GetAsync<List<ProductDto>>(cacheKey);
+            if (cached is not null)
+            {
+                _logger.Info($"Fetched {cached.Count} products from Redis cache.");
+                return cached;
+            }
+
+            _logger.Warn("No product data found in Redis cache. Falling back to DB.");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("Redis read failed. Falling back to DB.", ex);
+        }
+
+        var productsFromDb = await _productRepository.GetAllAsync();
+        var dtos = productsFromDb.Adapt<List<ProductDto>>();
+
+        try
+        {
+            await _cacheService.SetAsync(cacheKey, dtos);
+            _logger.Info($"Cached {dtos.Count} products to Redis with key '{cacheKey}'.");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("Redis write failed after DB fetch.", ex);
+        }
+        return dtos;
     }
 
     /// <summary>

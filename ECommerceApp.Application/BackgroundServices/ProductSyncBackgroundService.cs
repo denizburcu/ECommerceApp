@@ -77,10 +77,25 @@ public class ProductSyncBackgroundService : BackgroundService
             {
                 _logger.Error("An error occurred during product sync.", ex);
             }
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var repository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
+                var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
 
+                var allProducts = await repository.GetAllAsync();
+                const string cacheKey = "products:all";
+
+                await cacheService.SetAsync(cacheKey, allProducts);
+                _logger.Info($"[CACHE] Cached {allProducts.Count()} products to Redis with key '{cacheKey}'.");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("An error occurred while caching products to Redis.", ex);
+            }
+            
             await Task.Delay(_interval, stoppingToken);
         }
-
         _logger.Info("ProductSyncBackgroundService is stopping.");
     }
 }
