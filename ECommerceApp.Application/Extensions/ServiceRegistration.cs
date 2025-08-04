@@ -36,10 +36,10 @@ namespace ECommerceApp.Application.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IOrderService, OrderService>();
 
             services.AddScoped<IProductRepository, ProductRepository>();
-
-
+            
             return services;
         }
 
