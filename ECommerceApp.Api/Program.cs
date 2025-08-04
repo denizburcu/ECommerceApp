@@ -1,4 +1,5 @@
-﻿using ECommerceApp.Application.BackgroundServices;
+﻿using ECommerceApp.Api.Middlewares;
+using ECommerceApp.Application.BackgroundServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.UseAuthorization();
 app.MapControllers();
