@@ -88,10 +88,16 @@ docker-compose logs -f
 | **Serilog:WriteTo:1:Args:requestUri**        | `http://localhost:5044`                                                        |
 | **ExternalServices:BalanceApiBaseUrl**      | `https://balance-management-pi44.onrender.com`                                 |
 
+## 💻 Development Environment
+
+Run the API and Consumer projects directly from your IDE or via command line:
+
+```bash
 # From Rider or Visual Studio Code:
-# - Start the Api project
-# - Start the Consumer project
+#   - Start the Api project
+#   - Start the Consumer project
 
 # Or from the command line:
 cd Api && dotnet run
 cd ../Consumer && dotnet run
+
