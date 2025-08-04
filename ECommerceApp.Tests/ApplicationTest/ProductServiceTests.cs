@@ -38,7 +38,15 @@ public class ProductServiceTests
         // Arrange
         var cachedProducts = new List<ProductDto>
         {
-            new ProductDto { Id = Guid.NewGuid(), Name = "Test Product", Price = 10, Currency = "USD", Stock = 100, Category = "Books" }
+            new ProductDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test Product",
+                Price = 10,
+                Currency = "USD",
+                Stock = 100,
+                Category = "Books"
+            }
         };
 
         _mockCacheService
@@ -50,7 +58,9 @@ public class ProductServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(cachedProducts);
+        result.Succeeded.Should().BeTrue();
+        result.Data.Should().BeEquivalentTo(cachedProducts);
+        result.Error.Should().BeNull();
 
         _mockRepository.Verify(r => r.GetAllAsync(), Times.Never);
         _mockCacheService.Verify(c => c.SetAsync(It.IsAny<string>(), It.IsAny<List<ProductDto>>()), Times.Never);

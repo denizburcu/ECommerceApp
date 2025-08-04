@@ -1,3 +1,5 @@
+using ECommerceApp.Application.Common;
+
 namespace ECommerceApp.Application.Services;
 using ECommerceApp.Application.DTOs.Product;
 using ECommerceApp.Application.Interfaces;
@@ -30,7 +32,7 @@ public class ProductService : IProductService
     /// <summary>
     /// Retrieves all products.
     /// </summary>
-    public async Task<IEnumerable<ProductDto>> GetAllAsync()
+    public async Task<ServiceResult<IEnumerable<ProductDto>>> GetAllAsync()
     {
         const string cacheKey = "products:all";
 
@@ -40,7 +42,7 @@ public class ProductService : IProductService
             if (cached is not null)
             {
                 _logger.Info($"Fetched {cached.Count} products from Redis cache.");
-                return cached;
+                return ServiceResult<IEnumerable<ProductDto>>.Success(cached);
             }
 
             _logger.Warn("No product data found in Redis cache. Falling back to DB.");
@@ -50,19 +52,30 @@ public class ProductService : IProductService
             _logger.Error("Redis read failed. Falling back to DB.", ex);
         }
 
-        var productsFromDb = await _productRepository.GetAllAsync();
-        var dtos = productsFromDb.Adapt<List<ProductDto>>();
-
         try
         {
-            await _cacheService.SetAsync(cacheKey, dtos);
-            _logger.Info($"Cached {dtos.Count} products to Redis with key '{cacheKey}'.");
+            var productsFromDb = await _productRepository.GetAllAsync();
+            var dtos = productsFromDb.Adapt<List<ProductDto>>();
+
+            try
+            {
+                await _cacheService.SetAsync(cacheKey, dtos);
+                _logger.Info($"Cached {dtos.Count} products to Redis with key '{cacheKey}'.");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Redis write failed after DB fetch.", ex);
+            }
+
+            return ServiceResult<IEnumerable<ProductDto>>.Success(dtos);
         }
         catch (Exception ex)
         {
-            _logger.Error("Redis write failed after DB fetch.", ex);
+            _logger.Error("DB fetch failed.", ex);
+            return ServiceResult<IEnumerable<ProductDto>>.Failure(
+                new ServiceError(ServiceErrorCodes.DatabaseError, "Failed to retrieve product data.")
+            );
         }
-        return dtos;
     }
 
     /// <summary>
