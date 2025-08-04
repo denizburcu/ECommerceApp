@@ -1,14 +1,13 @@
 namespace ECommerceApp.Domain.DTOs.External;
 
+/// <summary>
+/// Represents the top-level response from the PreOrder API.
+/// </summary>
 public class PreOrderResponseDto
 {
-    /// <summary>
-    /// The details of the created pre-order.
-    /// </summary>
-    public PreOrderDto PreOrder { get; set; }
+    public bool Success { get; set; }
 
-    /// <summary>
-    /// The updated balance after the pre-order is created.
-    /// </summary>
-    public UpdatedBalanceDto UpdatedBalance { get; set; }
+    public string Message { get; set; }
+
+    public PreOrderResponseDataDto Data { get; set; }
 }

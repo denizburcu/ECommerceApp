@@ -5,7 +5,9 @@ using ECommerceApp.Application.DTOs.Order;
 using ECommerceApp.Application.Interfaces;
 using ECommerceApp.Domain.DTOs.External;
 using ECommerceApp.Infrastructure.Interfaces;
+using ECommerceApp.Shared.Commands;
 using Mapster;
+using MassTransit;
 
 namespace ECommerceApp.Application.Services;
 
@@ -16,38 +18,72 @@ public class OrderService : IOrderService
 {
     private readonly IBalanceApiClient _balanceApiClient;
     private readonly ILogService _logger;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IProductService _productService;
 
-    public OrderService(IBalanceApiClient balanceApiClient, ILogService logger)
+    public OrderService(IBalanceApiClient balanceApiClient, ILogService logger, IPublishEndpoint publishEndpoint,
+        IProductService productService)
     {
         _balanceApiClient = balanceApiClient;
         _logger = logger;
+        _publishEndpoint = publishEndpoint;
+        _productService = productService;
     }
+
+    public async Task<ServiceResult<bool>> EnqueueOrderAsync(CreateOrderRequest request)
+    {
+        var command = new CreateOrderCommand
+        {
+            OrderId = request.OrderId,
+            Amount = request.Amount,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _publishEndpoint.Publish(command);
+
+        return ServiceResult<bool>.Success();
+    }
+
     /// <summary>
     /// Creates a pre-order by reserving the amount using Balance API.
     /// </summary>
     public async Task<ServiceResult<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request)
     {
+        // TODO: Distributed lock
         try
         {
-            var externalRequest = request.Adapt<PreOrderRequestDto>();
+            var product = await _productService.GetByExternalIdAsync(request.ProductId);
+
+            if (product == null)
+            {
+                return ServiceResult<CreateOrderResponse>.Failure("10", "Product not found");
+            }
+
+            var externalRequest = new PreOrderRequestDto()
+            {
+                OrderId = request.OrderId,
+                Amount = request.Amount
+            };
             var externalResponse = await _balanceApiClient.PreOrderAsync(externalRequest);
 
             var response = new CreateOrderResponse
             {
-                PreOrder = externalResponse.PreOrder.Adapt<PreOrderDto>(),
-                UpdatedBalance = externalResponse.UpdatedBalance.Adapt<UpdatedBalanceDto>()
+                PreOrder = externalResponse.Data.PreOrder.Adapt<PreOrderDto>(),
+                UpdatedBalance = externalResponse.Data.UpdatedBalance.Adapt<UpdatedBalanceDto>()
             };
 
             return ServiceResult<CreateOrderResponse>.Success(response);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.Error("Createorder client exception.", ex);
+            
             return ServiceResult<CreateOrderResponse>.Failure(
                 ServiceErrorCodes.ExternalServiceError,
                 "Failed to create pre-order through Balance API.");
         }
     }
-    
+
     /// <summary>
     /// completes a order using Balance API.
     /// </summary>
@@ -73,7 +109,8 @@ public class OrderService : IOrderService
         catch (Exception ex)
         {
             _logger.Error("Failed to complete order for OrderId: {OrderId}", ex);
-            return ServiceResult<CompleteOrderResponse>.Failure("COMPLETE_ORDER_FAILED", "Failed to complete the order.");
+            return ServiceResult<CompleteOrderResponse>.Failure("COMPLETE_ORDER_FAILED",
+                "Failed to complete the order.");
         }
     }
 }

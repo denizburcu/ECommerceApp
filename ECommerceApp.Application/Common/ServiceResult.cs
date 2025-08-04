@@ -26,7 +26,11 @@ public class ServiceResult<T>
         Data = data;
         Error = error;
     }
-
+    /// <summary>
+    /// Creates a success result without data (default value of T).
+    /// </summary>
+    public static ServiceResult<T> Success() => new(true, default);
+    
     /// <summary>
     /// Creates a success result.
     /// </summary>

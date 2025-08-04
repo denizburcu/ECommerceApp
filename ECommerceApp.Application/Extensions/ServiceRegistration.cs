@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MassTransit;
 using ECommerceApp.Application.Services;
 using ECommerceApp.Application.Interfaces;
 using ECommerceApp.Application.Configurations;
@@ -39,7 +40,7 @@ namespace ECommerceApp.Application.Extensions
             services.AddScoped<IOrderService, OrderService>();
 
             services.AddScoped<IProductRepository, ProductRepository>();
-            
+
             return services;
         }
 
@@ -70,6 +71,33 @@ namespace ECommerceApp.Application.Extensions
                 client.BaseAddress = new Uri(config.BalanceApiBaseUrl);
             });
 
+            return services;
+        }
+
+        public static IServiceCollection AddApiMessaging(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddMassTransit(x =>
+            {
+                var transport = configuration["Messaging:Transport"]?.ToLowerInvariant();
+
+                x.SetKebabCaseEndpointNameFormatter();
+
+                if (transport == "rabbitmq")
+                {
+                    x.UsingRabbitMq((context, cfg) =>
+                    {
+                        var rmq = configuration.GetSection("RabbitMq");
+
+                        cfg.Host(rmq["Host"], rmq["VirtualHost"], h =>
+                        {
+                            h.Username(rmq["Username"]);
+                            h.Password(rmq["Password"]);
+                        });
+                    });
+                }
+            });
+
+            services.AddMassTransitHostedService();
             return services;
         }
     }

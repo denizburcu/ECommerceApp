@@ -1,18 +1,22 @@
+namespace ECommerceApp.Api.Controllers;
+
+using Microsoft.AspNetCore.Mvc;
+using MassTransit;
 using ECommerceApp.Application.DTOs.Order;
 using ECommerceApp.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-
-namespace ECommerceApp.Api.Controllers;
+using ECommerceApp.Shared.Commands;
 
 [ApiController]
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public OrdersController(IOrderService orderService)
+    public OrdersController(IOrderService orderService,IPublishEndpoint publishEndpoint)
     {
         _orderService = orderService;
+        _publishEndpoint = publishEndpoint;
     }
 
     /// <summary>
@@ -21,26 +25,12 @@ public class OrdersController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest request)
     {
-        var result = await _orderService.CreateOrderAsync(request);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        
+        var result = await _orderService.EnqueueOrderAsync(request);
 
-        if (result.Succeeded)
-        {
-            return Ok(new
-            {
-                success = true,
-                message = "Pre-order created successfully",
-                data = result.Data
-            });
-        }
-        return BadRequest(new
-        {
-            success = false,
-            error = new
-            {
-                code = result.Error?.Code,
-                message = result.Error?.Message
-            }
-        });
+        return Ok(result); 
     }
     
     /// <summary>

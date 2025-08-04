@@ -6,6 +6,8 @@ using ECommerceApp.Application.Common;
 using ECommerceApp.Application.DTOs.Order;
 public interface IOrderService
 {
+    Task<ServiceResult<bool>> EnqueueOrderAsync(CreateOrderRequest request);
+
     /// <summary>
     /// Create order
     /// </summary>

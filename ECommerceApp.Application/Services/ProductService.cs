@@ -85,6 +85,15 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdAsync(id);
         return product.Adapt<ProductDto>();
+    }    
+    
+    /// <summary>
+    /// Retrieves a product by its unique identifier.
+    /// </summary>
+    public async Task<ProductDto> GetByExternalIdAsync(string externalId)
+    {
+        var product = await _productRepository.GetByExternalIdAsync(externalId);
+        return product.Adapt<ProductDto>();
     }
 
     /// <summary>

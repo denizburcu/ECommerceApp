@@ -20,6 +20,11 @@ public interface IProductService
     Task<ProductDto> GetByIdAsync(Guid id);
 
     /// <summary>
+    /// Retrieves a product by its unique identifier.
+    /// </summary>
+    Task<ProductDto> GetByExternalIdAsync(string externalId);
+    
+    /// <summary>
     /// Creates a new product.
     /// </summary>
     Task<ProductDto> CreateAsync(CreateProductRequest dto);
