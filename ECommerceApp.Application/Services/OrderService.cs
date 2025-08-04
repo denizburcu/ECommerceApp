@@ -20,16 +20,20 @@ public class OrderService : IOrderService
     private readonly ILogService _logger;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IProductService _productService;
+    private readonly ICacheService _cacheService;
 
     public OrderService(IBalanceApiClient balanceApiClient, ILogService logger, IPublishEndpoint publishEndpoint,
-        IProductService productService)
+        IProductService productService,  ICacheService cacheService)
     {
         _balanceApiClient = balanceApiClient;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
         _productService = productService;
+        _cacheService = cacheService;
     }
-
+    /// <summary>
+    /// EnqueueOrderAsync
+    /// </summary>
     public async Task<ServiceResult<bool>> EnqueueOrderAsync(CreateOrderRequest request)
     {
         var command = new CreateOrderCommand
@@ -49,7 +53,17 @@ public class OrderService : IOrderService
     /// </summary>
     public async Task<ServiceResult<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request)
     {
-        // TODO: Distributed lock
+        var lockKey = $"order-lock:{request.OrderId}";
+        var lockValue = Guid.NewGuid().ToString();
+        var lockExpiration = TimeSpan.FromSeconds(10);
+
+        var lockAcquired = await _cacheService.AcquireLockAsync(lockKey, lockValue, lockExpiration);
+
+        if (!lockAcquired)
+        {
+            return ServiceResult<CreateOrderResponse>.Failure("DUPLICATE_ORDER", "Order is already being processed.");
+        }
+        
         try
         {
             var product = await _productService.GetByExternalIdAsync(request.ProductId);
@@ -89,6 +103,17 @@ public class OrderService : IOrderService
     /// </summary>
     public async Task<ServiceResult<CompleteOrderResponse>> CompleteOrderAsync(string orderId)
     {
+        var lockKey = $"complete-order-lock:{orderId}";
+        var lockValue = Guid.NewGuid().ToString();
+        var lockExpiration = TimeSpan.FromSeconds(10); // Config'e alınabilir
+
+        var lockAcquired = await _cacheService.AcquireLockAsync(lockKey, lockValue, lockExpiration);
+
+        if (!lockAcquired)
+        {
+            return ServiceResult<CompleteOrderResponse>.Failure("ORDER_LOCKED", "Order is currently being completed by another process.");
+        }
+        
         try
         {
             var result = await _balanceApiClient.CompleteOrderAsync(new CompleteOrderRequestDto
