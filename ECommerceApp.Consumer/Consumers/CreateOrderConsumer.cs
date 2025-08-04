@@ -25,6 +25,7 @@ public class CreateOrderConsumer : IConsumer<CreateOrderCommand>
         var request = new CreateOrderRequest
         {
             OrderId = message.OrderId,
+            ProductId = message.ProductId,
             Amount = message.Amount
         };
 

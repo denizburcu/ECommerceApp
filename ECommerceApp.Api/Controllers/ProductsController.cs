@@ -30,19 +30,6 @@ public class ProductsController : ControllerBase
     {
         var result = await _productService.GetAllAsync();
 
-        if (result.Succeeded)
-        {
-            return Ok(new { success = true, data = result.Data });
-        }
-
-        return BadRequest(new
-        {
-            success = false,
-            error = new
-            {
-                code = result.Error?.Code,
-                message = result.Error?.Message
-            }
-        });
+        return Ok(result);
     }
 }

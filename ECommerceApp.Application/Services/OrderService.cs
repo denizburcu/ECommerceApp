@@ -39,6 +39,7 @@ public class OrderService : IOrderService
         var command = new CreateOrderCommand
         {
             OrderId = request.OrderId,
+            ProductId = request.ProductId,
             Amount = request.Amount,
             CreatedAt = DateTime.UtcNow
         };
@@ -66,18 +67,12 @@ public class OrderService : IOrderService
         
         try
         {
-            var product = await _productService.GetByExternalIdAsync(request.ProductId);
-
-            if (product == null)
-            {
-                return ServiceResult<CreateOrderResponse>.Failure("10", "Product not found");
-            }
-
             var externalRequest = new PreOrderRequestDto()
             {
                 OrderId = request.OrderId,
                 Amount = request.Amount
             };
+            
             var externalResponse = await _balanceApiClient.PreOrderAsync(externalRequest);
 
             var response = new CreateOrderResponse

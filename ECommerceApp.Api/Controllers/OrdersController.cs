@@ -40,19 +40,7 @@ public class OrdersController : ControllerBase
     public async Task<IActionResult> CompleteOrder(string id)
     {
         var result = await _orderService.CompleteOrderAsync(id);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest(new
-            {
-                success = false,
-                error = new
-                {
-                    code = result.Error?.Code,
-                    message = result.Error?.Message
-                }
-            });
-        }
-        return Ok(result.Data);
+        
+        return Ok(result);
     }
 }

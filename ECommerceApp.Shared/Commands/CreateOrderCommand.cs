@@ -3,10 +3,15 @@ namespace ECommerceApp.Shared.Commands;
 public class CreateOrderCommand
 {
         /// <summary>
-        /// Unique identifier for the order (API'den gönderilen OrderId ile aynı).
+        /// Unique identifier for the order
         /// </summary>
         public string OrderId { get; init; }
 
+        /// <summary>
+        /// ProductId
+        /// </summary>
+        public string ProductId { get; init; }
+        
         /// <summary>
         /// Amount to be blocked from the balance.
         /// </summary>
