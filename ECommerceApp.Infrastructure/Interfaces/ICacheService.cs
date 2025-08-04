@@ -22,4 +22,14 @@ public interface ICacheService
     /// Removes the cached value associated with the specified key.
     /// </summary>
     Task RemoveAsync(string key);
+
+    /// <summary>
+    /// Acquires a distributed lock for the given key.
+    /// </summary>
+    Task<bool> AcquireLockAsync(string key, string value, TimeSpan expiration);
+
+    /// <summary>
+    /// Releases the distributed lock for the given key only if the value matches.
+    /// </summary>
+    Task<bool> ReleaseLockAsync(string key, string value);
 }

@@ -50,4 +50,37 @@ public class RedisCacheService : ICacheService
     {
         await GetDb().KeyDeleteAsync(key);
     }
+    
+    /// <summary>
+    /// Acquires a distributed lock for the given key.
+    /// </summary>
+    public async Task<bool> AcquireLockAsync(string key, string value, TimeSpan expiration)
+    {
+        return await GetDb().StringSetAsync(
+            key,
+            value,
+            expiration,
+            when: When.NotExists); // SETNX
+    }
+
+    /// <summary>
+    /// Releases the distributed lock for the given key only if the value matches.
+    /// </summary>
+    public async Task<bool> ReleaseLockAsync(string key, string value)
+    {
+        var script = @"
+            if redis.call('get', KEYS[1]) == ARGV[1]
+            then
+                return redis.call('del', KEYS[1])
+            else
+                return 0
+            end";
+
+        var result = await GetDb().ScriptEvaluateAsync(
+            script,
+            keys: new RedisKey[] { key },
+            values: new RedisValue[] { value });
+
+        return (int)result == 1;
+    }
 }
