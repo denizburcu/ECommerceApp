@@ -12,4 +12,6 @@ public static class ServiceErrorCodes
     public const string DatabaseError = "DATABASE_ERROR";
     public const string ExternalServiceError = "EXTERNAL_SERVICE_ERROR";
     public const string UnknownError = "UNKNOWN_ERROR";
+    public const string UnexpectedError = "UNEXPECTED_ERROR";
+
 }
