@@ -24,7 +24,7 @@ public class RedisCacheServiceTests
             .AddJsonFile("appsettings.json")
             .Build();
 
-        var redisSettings = configuration.GetSection("Redis").Get<RedisSettings>()!;
+        var redisSettings = configuration.GetSection("RedisSettings").Get<RedisSettings>()!;
 
         var options = Options.Create(redisSettings);
         _cacheService = new RedisCacheService(options);

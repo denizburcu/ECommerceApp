@@ -51,9 +51,7 @@ namespace ECommerceApp.Application.Extensions
             IConfiguration configuration)
         {
             // Redis
-            var redisSettings = new RedisSettings();
-            configuration.GetSection("Redis").Bind(redisSettings);
-            services.AddSingleton(redisSettings);
+            services.Configure<RedisSettings>(configuration.GetSection("RedisSettings"));
             services.AddSingleton<ICacheService, RedisCacheService>();
 
             // Log
